@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" data-theme="classic">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inkroot</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;600;700&family=Caveat:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet CSS & JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              bg: "var(--bg)",
+              text: "var(--text)",
+              accent: "var(--accent)",
+              accent2: "var(--accent2)",
+              surface: "var(--surface)",
+              border: "var(--border)",
+            },
+            fontFamily: {
+              sans: ["var(--font-sans)", "sans-serif"],
+              serif: ["var(--font-serif)", "serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* CSS Custom Properties for Themes */
+      :root,
+      [data-theme="classic"] {
+        --bg: #f4f1ea;
+        --text: #2c302e;
+        --accent: #7b2d26;
+        --accent2: #c9a96e;
+        --surface: #ede9df;
+        --border: #d4ccba;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Playfair Display", serif;
+      }
+      [data-theme="midnight"] {
+        --bg: #0f172a;
+        --text: #e2e8f0;
+        --accent: #38bdf8;
+        --accent2: #818cf8;
+        --surface: #1e293b;
+        --border: #334155;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Playfair Display", serif;
+      }
+      [data-theme="coffeehouse"] {
+        --bg: #3c2a21;
+        --text: #e5e5e5;
+        --accent: #d5cea3;
+        --accent2: #e5e5cb;
+        --surface: #1a120b;
+        --border: #5c3d2e;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Playfair Display", serif;
+      }
+      [data-theme="paperback"] {
+        --bg: #fdf6e3;
+        --text: #586e75;
+        --accent: #b58900;
+        --accent2: #cb4b16;
+        --surface: #eee8d5;
+        --border: #93a1a1;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Crimson Pro", serif;
+      }
+      [data-theme="forest"] {
+        --bg: #1a2f23;
+        --text: #d1d5db;
+        --accent: #10b981;
+        --accent2: #34d399;
+        --surface: #064e3b;
+        --border: #065f46;
+        --font-sans: "Outfit", sans-serif;
+        --font-serif: "Lora", serif;
+      }
+      [data-theme="lavender"] {
+        --bg: #f5f3ff;
+        --text: #4c1d95;
+        --accent: #8b5cf6;
+        --accent2: #a78bfa;
+        --surface: #ede9fe;
+        --border: #ddd6fe;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Playfair Display", serif;
+      }
+      [data-theme="cyberpunk"] {
+        --bg: #000000;
+        --text: #00ff00;
+        --accent: #ff00ff;
+        --accent2: #00ffff;
+        --surface: #111111;
+        --border: #333333;
+        --font-sans: "Space Grotesk", sans-serif;
+        --font-serif: "JetBrains Mono", monospace;
+      }
+      [data-theme="royal"] {
+        --bg: #1e1b4b;
+        --text: #fef3c7;
+        --accent: #fbbf24;
+        --accent2: #f59e0b;
+        --surface: #312e81;
+        --border: #4338ca;
+        --font-sans: "Outfit", sans-serif;
+        --font-serif: "Playfair Display", serif;
+      }
+      [data-theme="pride"] {
+        --bg: #ffffff;
+        --text: #1f2937;
+        --accent: #8b5cf6;
+        --accent2: #ec4899;
+        --surface: #fdf2ff;
+        --border: #f5d0fe;
+        --font-sans: "Outfit", sans-serif;
+        --font-serif: "Space Grotesk", sans-serif;
+      }
+      [data-theme="gazette"] {
+        --bg: #e5e7eb;
+        --text: #111827;
+        --accent: #991b1b;
+        --accent2: #1e3a8a;
+        --surface: #d1d5db;
+        --border: #9ca3af;
+        --font-sans: "Inter", sans-serif;
+        --font-serif: "Crimson Pro", serif;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        margin: 0;
+        padding: 0;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      .font-serif {
+        font-family: var(--font-serif);
+      }
+
+      /* Spark Challenge Styles */
+      .circular-progress {
+        position: relative;
+        height: 120px;
+        width: 120px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .circular-progress:before {
+        content: "";
+        position: absolute;
+        height: 84%;
+        width: 84%;
+        background-color: var(--bg);
+        border-radius: 50%;
+      }
+      .value-container {
+        position: relative;
+        font-family: var(--font-serif);
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--text);
+      }
+      @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+      }
+      .shake {
+        animation: shake 0.5s;
+        animation-iteration-count: infinite;
+      }
+      .glow-target {
+        text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+        color: var(--accent) !important;
+        transition: all 0.3s ease;
+      }
+
+      /* Inkwell Store Upgrades */
+      .texture-parchment {
+        background-color: #f4e4bc !important;
+        color: #5c4033 !important;
+        border-color: #d4c49c !important;
+        background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.1"/></svg>');
+      }
+      .texture-midnight {
+        background-color: #0f172a !important;
+        color: #e2e8f0 !important;
+        border-color: #1e293b !important;
+        background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      }
+      .font-typewriter {
+        font-family: 'JetBrains Mono', monospace !important;
+      }
+      .font-handwritten {
+        font-family: 'Caveat', cursive !important;
+        font-size: 1.2em !important;
+      }
+      @keyframes marquee {
+        0% { transform: translateX(100vw); }
+        100% { transform: translateX(-100%); }
+      }
+      .animate-marquee {
+        animation: marquee 25s linear infinite;
+        display: inline-block;
+        white-space: nowrap;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script type="module" crossorigin src="/assets/index-BY7o0X6Q.js"></script>
+  </head>
+  <body class="flex h-screen overflow-hidden bg-bg text-text">
+    <!-- Sidebar Backdrop (Mobile) -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300"></div>
+
+    <!-- Book Spine Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed md:relative z-40 w-[260px] bg-surface border-r border-border flex flex-col h-full shrink-0 transition-all duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none"
+    >
+      <div class="p-6 border-b border-border flex items-center justify-between">
+        <h1 class="text-3xl font-serif font-bold text-accent">Inkroot</h1>
+        <button id="sidebar-close" class="md:hidden p-1 text-text/40 hover:text-accent transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
+        <a
+          href="#/"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Home</a
+        >
+        <a
+          href="#/discover"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Discover</a
+        >
+        <a
+          href="#/write"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent"
+          >Write</a
+        >
+        <a
+          href="#/map"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Writers Map</a
+        >
+        <a
+          href="#/events"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Events</a
+        >
+        <a
+          href="#/messages"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors flex justify-between items-center"
+          >
+          <span>Messages</span>
+          <span id="global-unread-badge" class="bg-accent text-bg text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+        </a>
+        <a
+          href="#/wallet"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent2"
+          >Wallet</a
+        >
+        <a
+          href="#/spark"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent"
+          >Spark Challenge</a
+        >
+        <a
+          href="#/spark-board"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent2"
+          >Spark Board</a
+        >
+        <a
+          href="#/marketplace"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent"
+          >Marketplace</a
+        >
+        <a
+          href="#/admin"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Admin</a
+        >
+        <a
+          href="#/profile"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >My Desk</a
+        >
+        <a
+          href="#/about"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >About Me</a
+        >
+        <a
+          href="#/rules"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors"
+          >Rules & Regulations</a
+        >
+        <a
+          href="#/support"
+          class="block px-4 py-2 rounded hover:bg-bg transition-colors font-medium text-accent"
+          >Support Chat</a
+        >
+      </nav>
+
+      <div class="p-4 border-t border-border flex flex-col gap-3">
+        <button
+          id="auth-btn"
+          class="w-full py-2 px-4 bg-accent text-bg rounded font-medium hover:opacity-90 transition-opacity hidden"
+        >
+          Sign In
+        </button>
+        <button
+          id="theme-toggle-btn"
+          class="w-full py-2 px-4 border border-border rounded hover:bg-bg transition-colors text-sm"
+        >
+          Theme: Classic Print
+        </button>
+        <div class="text-xs text-text/60 text-center mt-2 italic">
+          Curated by Faez Ahmad
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto relative flex flex-col">
+      <!-- Top Bar for Mobile/Desktop Toggle -->
+      <header class="sticky top-0 z-20 bg-bg/80 backdrop-blur-md border-b border-border/50 flex items-center px-4 py-2">
+        <button id="sidebar-toggle" class="p-2 text-text/60 hover:text-accent transition-colors rounded-lg hover:bg-surface">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+        <div class="ml-4 md:hidden font-serif font-bold text-accent text-xl">Inkroot</div>
+      </header>
+      
+      <div id="app-content" class="flex-1 w-full"></div>
+    </main>
+
+    <!-- Toast Container -->
+    <div
+      id="toast-container"
+      class="fixed bottom-4 right-4 flex flex-col gap-2 z-50"
+    ></div>
+
+    <!-- Application Logic -->
+    <script>
+      window.sanitize = (str) => {
+        if (!str) return "";
+        return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(str) : str;
+      };
+
+      // Admin UI Helpers
+      window.isAdminUser = (user) => user?.role === 'admin';
+      
+      window.renderUserName = (user, extraClasses = "") => {
+        const name = window.sanitize(user?.display_name || user?.username || "Anonymous");
+        if (window.isAdminUser(user)) {
+          return `<span class="bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 bg-clip-text text-transparent font-bold ${extraClasses}">${name}</span> <span title="Founder" class="inline-block ml-1 text-yellow-500 drop-shadow-md">👑</span>`;
+        }
+        return `<span class="${extraClasses}">${name}</span>`;
+      };
+
+      window.renderAvatar = (user, extraClasses = "") => {
+        const src = user?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.username || 'user'}`;
+        const adminClasses = window.isAdminUser(user) ? "ring-2 ring-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" : "border border-border";
+        return `<img src="${src}" alt="Avatar" class="object-cover rounded-full ${adminClasses} ${extraClasses}" loading="lazy">`;
+      };
+
+      window.renderLighthousePoints = (user) => {
+        if (window.isAdminUser(user)) return `<span class="text-yellow-500 font-bold text-xl drop-shadow-sm">∞</span>`;
+        return user?.lighthouse_points || 0;
+      };
+
+      window.renderUserTier = (user) => {
+        if (window.isAdminUser(user)) return `<span class="text-yellow-600 font-bold tracking-widest uppercase">Founder</span>`;
+        const pts = user?.lighthouse_points || 0;
+        if (pts >= 700) return "Beacon";
+        if (pts >= 350) return "Illuminator";
+        if (pts >= 150) return "Lantern";
+        if (pts >= 50) return "Spark";
+        return "Novice";
+      };
+
+      // Admin Inline Moderation Actions
+      window.deleteWork = async (workId) => {
+        if (!confirm("Admin: Are you sure you want to delete this work?")) return;
+        try {
+          const { error } = await window.sb.from("works").delete().eq("id", workId);
+          if (error) throw error;
+          window.showToast("Work deleted successfully", "success");
+          window.loadRoute(); // Reload current view
+        } catch (e) {
+          window.showToast("Failed to delete work: " + e.message, "error");
+        }
+      };
+
+      window.banUser = async (userId) => {
+        if (!confirm("Admin: Are you sure you want to ban this user?")) return;
+        try {
+          const { error } = await window.sb.from("users").update({ is_banned: true }).eq("id", userId);
+          if (error) throw error;
+          window.showToast("User banned successfully", "success");
+          window.loadRoute();
+        } catch (e) {
+          window.showToast("Failed to ban user: " + e.message, "error");
+        }
+      };
+
+      // Global Image Fallback System
+      window.addEventListener('error', (e) => {
+        if (e.target.tagName === 'IMG') {
+          const isAvatar = e.target.classList.contains('avatar') || e.target.closest('.avatar-container');
+          const fallback = isAvatar 
+            ? `https://ui-avatars.com/api/?name=User&background=random`
+            : `https://picsum.photos/seed/${Math.random()}/800/600`;
+          
+          if (e.target.src !== fallback) {
+            e.target.src = fallback;
+          }
+          e.target.onerror = null; // Prevent infinite loop
+        }
+      }, true);
+
+      // Supabase Error Helper
+      window.handleError = (error, customMessage = "An unexpected error occurred") => {
+        console.error("Supabase Error:", error);
+        const message = error?.message || customMessage;
+        window.showToast(window.sanitize(message), "error");
+      };
+
+      // Global Unread Messages Badge
+      window.updateUnreadBadge = async () => {
+        const { data: sessionData } = await window.sb.auth.getSession();
+        const currentUser = sessionData?.session?.user;
+        if (!currentUser) return;
+
+        // Find conversations where user is participant
+        const { data: convs } = await window.sb
+          .from("conversations")
+          .select("id")
+          .or(`initiator_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);
+        
+        if (!convs || convs.length === 0) return;
+        const convIds = convs.map(c => c.id);
+
+        // Count unread messages not sent by current user
+        const { count } = await window.sb
+          .from("direct_messages")
+          .select("*", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .eq("is_read", false)
+          .neq("sender_id", currentUser.id);
+
+        const badge = document.getElementById("global-unread-badge");
+        if (badge) {
+          if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove("hidden");
+          } else {
+            badge.classList.add("hidden");
+          }
+        }
+      };
+
+      // Set up global realtime listener for messages
+      let globalMessageSub = null;
+      window.setupGlobalMessageListener = async () => {
+        const { data: sessionData } = await window.sb.auth.getSession();
+        const currentUser = sessionData?.session?.user;
+        if (!currentUser) return;
+
+        if (globalMessageSub) globalMessageSub.unsubscribe();
+        
+        globalMessageSub = window.sb
+          .channel('global-messages')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' }, payload => {
+            if (payload.new.sender_id !== currentUser.id) {
+              window.updateUnreadBadge();
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'direct_messages' }, payload => {
+             window.updateUnreadBadge();
+          })
+          .subscribe();
+          
+        window.updateUnreadBadge();
+      };
+
+    </script>
+
+    <!-- Auth & Profile Module -->
+
+    <!-- Feed & Publishing Module -->
+
+    <!-- Gamification & Sharing Module -->
+
+    <!-- Sprint Timer Module -->
+
+    <!-- Literary Map & Events Module -->
+
+    <!-- Spark Challenge Module -->
+
+    <!-- Wallet Module -->
+
+    <!-- Admin Dashboard Module -->
+
+    <!-- Centralized Router (Fixes Fragile Routing) -->
+  </body>
+</html>
